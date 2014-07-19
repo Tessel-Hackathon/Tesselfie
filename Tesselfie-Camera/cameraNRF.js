@@ -10,7 +10,7 @@ var nrf = NRF24.channel(0x4c) // set the RF channel to 76. Frequency = 2400 + RF
   .dataRate('1Mbps')
   .crcBytes(2) // 2 byte CRC
   .autoRetransmit({count:15, delay:4000})
-  .use(tessel.port['C']);
+  .use(tessel.port['B']);
 
 nrf._debug = false;
 nrf.on('ready', function () {
