@@ -3,6 +3,8 @@ var tessel = require('tessel'),
   pipes = [0xF0F0F0F0E1, 0xF0F0F0F0D2],
   role = 'pong'; // swap this to pong if you want to wait for receive
 
+var tx;
+
 var nrf = NRF24.channel(0x4c) // set the RF channel to 76. Frequency = 2400 + RF_CH [MHz] = 2476MHz
   .transmitPower('PA_MAX') // set the transmit power to max
   .dataRate('1Mbps')
@@ -11,8 +13,11 @@ var nrf = NRF24.channel(0x4c) // set the RF channel to 76. Frequency = 2400 + RF
   .use(tessel.port['A']);
 
 nrf._debug = false;
-
 nrf.on('ready', function () {
+
+  nrfReady = true;
+
+  console.log('kale');
   setTimeout(function(){
     nrf.printDetails();
   }, 5000);
@@ -20,17 +25,18 @@ nrf.on('ready', function () {
   if (role === 'ping') {
     console.log("PING out");
 
-    var tx = nrf.openPipe('tx', pipes[0], {autoAck: false}), // transmit address F0F0F0F0D2
-      rx = nrf.openPipe('rx', pipes[1], {size: 4}); // receive address F0F0F0F0D2
+    tx = nrf.openPipe('tx', pipes[0], {autoAck: false}); // transmit address F0F0F0F0D2
+    var rx = nrf.openPipe('rx', pipes[1], {size: 4}); // receive address F0F0F0F0D2
+    
     tx.on('ready', function () {
+      pingOpen = true;
+
+      console.log('pipe is open');
       var n = 0;
-      setInterval(function () {
-        var b = new Buffer(4); // set buff len of 8 for compat with maniac bug's RF24 lib
-        b.fill(0);
-        b.writeUInt32BE(n++);
-        console.log("Sending", n);
-        tx.write(b);
-      }, 5e3); // transmit every 5 seconds
+      var testObj = {
+        machine: 'Tessel',
+        color: 'red'
+      };
     });
     rx.on('data', function (d) {
       console.log("Got response back:", d);
@@ -47,7 +53,5 @@ nrf.on('ready', function () {
       console.warn("Error sending reply.", e);
     });
   }
+  console.log('kaleover');
 });
-
-// hold this process open
-process.ref();

@@ -9,8 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    
+    "audio-vs1053b": "^0.1.6",
     "camera-vc0706": "^0.1.6",
-    "audio-vs1053b": "^0.1.6"
+    "rf-nrf24": "^0.8.5"
   }
 }
