@@ -15,7 +15,10 @@ var rfid = rfidlib.use(tessel.port['D']);
 var ambientReady = false;
 var climateReady = false;
 
-var currentDegrees = 0;
+var currentDegrees;
+var currentHumidity;
+var currentLightLevel;
+var currentSoundLevel;
 
 pingOpen = false;
 
@@ -41,7 +44,9 @@ rfid.on('ready', function (version) {
 
     ambient.getLightLevel( function(err, ldata) {
       ambient.getSoundLevel( function(err, sdata) {
-        console.log("Light level:", ldata.toFixed(8), " ", "Sound Level:", sdata.toFixed(8));
+        currentLightLevel = ldata.toFixed(3);
+        currentSoundLevel = sdata.toFixed(3);
+        console.log("Light level:", ldata.toFixed(3), " ", "Sound Level:", sdata.toFixed(3));
       });
     });
 
@@ -51,8 +56,9 @@ rfid.on('ready', function (version) {
 
     climate.readTemperature('f', function (err, temp) {
       climate.readHumidity(function (err, humid) {
-        currentDegrees = temp;
-        console.log('Degrees:', temp.toFixed(4) + 'F', 'Humidity:', humid.toFixed(4) + '%RH');
+        currentDegrees = temp.toFixed(1);
+        currentHumidity = humid.toFixed(0);
+        console.log('Degrees:', temp.toFixed(1) + 'F', 'Humidity:', humid.toFixed(0) + '%RH');
       });
     });
 
@@ -61,20 +67,24 @@ rfid.on('ready', function (version) {
     });
 
     if (pingOpen) {
-      var dataObj = {
-        temp: currentDegrees,
-        color: 'red'
+      var visualObj = {
+        L: currentLightLevel,
+        S: currentSoundLevel
+      };
+      var tempObj = {
+        T: currentDegrees,
+        H: currentHumidity,
       };
 
-      var b = new Buffer(32); // set buff len of 8 for compat with maniac bug's RF24 lib
-      //b.fill(0);
-      //b.writeUInt32BE(n++);
-      
-      var stringified = JSON.stringify(dataObj);
-      b.write(stringified);
-
-      console.log("Sending", b);
-      tx.write(b);
+      var sendObj = function(obj){
+        var b = new Buffer(32);
+        var stringified = JSON.stringify(obj);
+        b.write(stringified);
+        console.log("Sending", b);
+        tx.write(b);
+      };
+      sendObj(visualObj);
+      sendObj(tempObj);
     }
 
   });
@@ -94,7 +104,7 @@ var nrf = NRF24.channel(0x4c) // set the RF channel to 76. Frequency = 2400 + RF
   .dataRate('1Mbps')
   .crcBytes(2) // 2 byte CRC
   .autoRetransmit({count:15, delay:4000})
-  .use(tessel.port['A']);
+  .use(tessel.port['B']);
 
 nrf._debug = false;
 nrf.on('ready', function () {
