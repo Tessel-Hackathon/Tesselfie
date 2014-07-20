@@ -10,7 +10,10 @@
   "license": "ISC",
   "dependencies": {
     "audio-vs1053b": "^0.1.6",
+    "ble-ble113a": "^0.1.9",
     "camera-vc0706": "^0.1.6",
-    "rf-nrf24": "^0.8.5"
+    "rf-nrf24": "^0.8.5",
+    "sdcard": "^0.8.3",
+    "structured-clone": "^0.2.2"
   }
 }
